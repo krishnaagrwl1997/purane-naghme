@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design tokens. Tailwind v4 reads these directly — there is no
+   tailwind.config file. `--color-x` gives you `bg-x`, `text-x`,
+   `border-x`, `from-x`, and so on.
+   ------------------------------------------------------------------ */
+@theme {
+  /* Lamp / accent — warm marigold, pulled from the sunlit street */
+  --color-accent: #f0a73c;
+  --color-accent-soft: #ffc973;
+  --color-accent-deep: #d98420;
+
+  /* The cassette deck's moulded plastic */
+  --color-deck: #e6dbbb;
+  --color-deck-hi: #f4ecd6;
+  --color-deck-lo: #c5b591;
+  --color-deck-edge: #8c7c5c;
+  --color-deck-ink: #43391f;
+  --color-deck-dim: #7d6d4d;
+  --color-deck-red: #9d2f22;
+  --color-window: #17170f;
+  --color-window-ink: #cfe0b8;
+
+  /* Ink on the scene */
+  --color-ink: #f6efe4;
+  --color-ink-dim: #cfc3b1;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif;
+  --font-display: var(--font-yatra), ui-serif, Georgia, serif;
+  --font-deva: var(--font-tiro), ui-serif, Georgia, serif;
+  --font-hand: var(--font-caveat), ui-serif, cursive;
+  --font-cond: var(--font-barlow), "Arial Narrow", ui-sans-serif, sans-serif;
+
+  --animate-blink: blink 1s step-end infinite;
+}
+
+/* The clock's colon */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Reels turning behind the tape window */
+@keyframes reel-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+html {
+  color-scheme: dark;
+  background-color: #241d16;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ------------------------------------------------------------------
+   The scene.
+
+   Two separately composed images — scene-tall.png is NOT a crop of
+   scene-wide.png, so we swap the whole file on orientation rather than
+   trying to rescue a badly framed landscape with background-position.
+   ------------------------------------------------------------------ */
+.hero-bg {
+  background-image: url("/bg/scene-wide.png");
+  background-repeat: no-repeat;
+  background-position: center 42%;
+}
+
+@media (orientation: portrait) {
+  .hero-bg {
+    background-image: url("/bg/scene-tall.png");
+    background-position: center center;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Film grain. Inline feTurbulence as a data URI — no request, no
+   raster decode.
+   ------------------------------------------------------------------ */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+  mix-blend-mode: overlay;
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    opacity: 0.18;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Safe areas. Every fixed edge clears the notch / home indicator /
+   landscape rounded corners, with a 1rem floor where the inset is 0.
+   Paired with `viewportFit: "cover"` in app/layout.tsx.
+   ------------------------------------------------------------------ */
+.safe-top {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+.safe-x {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+/* ------------------------------------------------------------------
+   The moulded plastic of the deck. Brushed-plastic speckle over a
+   vertical falloff, with a lit top edge and a shadowed bottom lip.
+   ------------------------------------------------------------------ */
+.deck-shell {
+  background-image:
+    repeating-linear-gradient(
+      92deg,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      rgba(0, 0, 0, 0) 1px 3px
+    ),
+    linear-gradient(to bottom, var(--color-deck-hi) 0%, var(--color-deck) 42%, var(--color-deck-lo) 100%);
+  box-shadow:
+    0 32px 64px -22px rgba(0, 0, 0, 0.85),
+    0 6px 14px -6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.14);
+}
+
+/* A recess routed into the plastic — used for the scale and the window. */
+.deck-recess {
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.32),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* A key you can press. */
+.deck-key {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-deck-hi) 0%,
+    #ded2b2 55%,
+    var(--color-deck-lo) 100%
+  );
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.22),
+    0 3px 6px -2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.deck-key:active:not(:disabled),
+.deck-key[data-down="true"] {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.deck-key:disabled {
+  opacity: 0.45;
+}
+
+/* ------------------------------------------------------------------
+   The tape-position scale. The needle is a knob you can grab; it
+   stays put while dragging, and grows on hover.
+   ------------------------------------------------------------------ */
+.scale-needle {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+  transform: translateX(-50%) scaleY(1);
+}
+.tape-scale:hover .scale-needle,
+.tape-scale[data-scrubbing="true"] .scale-needle,
+.tape-scale:focus-visible .scale-needle {
+  transform: translateX(-50%) scaleY(1.18);
+  box-shadow: 0 0 10px rgba(157, 47, 34, 0.75);
+}
+
+/* ------------------------------------------------------------------
+   The YouTube iframe host. YT.Player REPLACES the element you hand it,
+   so the sizing has to live on the parent.
+   ------------------------------------------------------------------ */
+.yt-host iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
